@@ -31,8 +31,7 @@ TreeNode *createNode(int data)
 }
 
 
-/* BST에 데이터 삽입
-   기존 노드와 숫자를 비교할 때마다 comparisonCount 증가 */
+/* BST 삽입 */
 void insertBST(TreeNode **root, int data, long long *comparisonCount)
 {
     TreeNode *newNode = createNode(data);
@@ -46,29 +45,39 @@ void insertBST(TreeNode **root, int data, long long *comparisonCount)
     TreeNode *current = *root;
     TreeNode *parent = NULL;
 
+    /*
+     * 0 : 왼쪽에 삽입
+     * 1 : 오른쪽에 삽입
+     */
+    int direction = 0;
+
     while (current != NULL) {
         parent = current;
 
         /*
-         * 현재 노드의 값과 삽입할 값을 비교하는 것을
+         * 삽입할 값과 현재 노드의 값을 비교하는 것을
          * 숫자 비교 1회로 계산한다.
          */
         (*comparisonCount)++;
 
         if (data < current->data) {
+            direction = 0;
             current = current->left;
         }
         else {
+            direction = 1;
             current = current->right;
         }
     }
 
-    if (data < parent->data) {
+    /*
+     * while문에서 마지막으로 결정한 방향을 사용하므로
+     * 삽입 위치를 결정하기 위한 불필요한 추가 비교가 없다.
+     */
+    if (direction == 0)
         parent->left = newNode;
-    }
-    else {
+    else
         parent->right = newNode;
-    }
 }
 
 
@@ -80,9 +89,8 @@ int sequentialSearch(int array[], int size, int key, int *comparisonCount)
     for (int i = 0; i < size; i++) {
         (*comparisonCount)++;
 
-        if (array[i] == key) {
+        if (array[i] == key)
             return 1;
-        }
     }
 
     return 0;
@@ -97,25 +105,82 @@ int bstSearch(TreeNode *root, int key, int *comparisonCount)
     *comparisonCount = 0;
 
     while (current != NULL) {
-
         /*
-         * 탐색 대상과 현재 노드 값을 판단하는 것을
+         * 탐색 대상과 현재 노드의 값을 비교하여
+         * 일치 / 왼쪽 / 오른쪽을 결정하는 것을
          * 숫자 비교 1회로 계산한다.
          */
         (*comparisonCount)++;
 
-        if (key == current->data) {
+        if (key == current->data)
             return 1;
-        }
-        else if (key < current->data) {
+
+        if (key < current->data)
             current = current->left;
-        }
-        else {
+        else
             current = current->right;
-        }
     }
 
     return 0;
+}
+
+
+/* BST 높이 계산
+   루트 노드의 높이는 1로 계산 */
+int getHeight(TreeNode *root)
+{
+    if (root == NULL)
+        return 0;
+
+    int leftHeight = getHeight(root->left);
+    int rightHeight = getHeight(root->right);
+
+    if (leftHeight > rightHeight)
+        return leftHeight + 1;
+    else
+        return rightHeight + 1;
+}
+
+
+/* 리프 노드 개수 */
+int countLeafNodes(TreeNode *root)
+{
+    if (root == NULL)
+        return 0;
+
+    if (root->left == NULL && root->right == NULL)
+        return 1;
+
+    return countLeafNodes(root->left)
+         + countLeafNodes(root->right);
+}
+
+
+/* 내부 노드 개수 */
+int countInternalNodes(TreeNode *root)
+{
+    if (root == NULL)
+        return 0;
+
+    if (root->left == NULL && root->right == NULL)
+        return 0;
+
+    return 1
+         + countInternalNodes(root->left)
+         + countInternalNodes(root->right);
+}
+
+
+/* 모든 노드 깊이의 합
+   루트 깊이는 1로 계산 */
+long long getTotalDepth(TreeNode *root, int depth)
+{
+    if (root == NULL)
+        return 0;
+
+    return depth
+         + getTotalDepth(root->left, depth + 1)
+         + getTotalDepth(root->right, depth + 1);
 }
 
 
@@ -152,11 +217,6 @@ int main(void)
     int data[DATA_SIZE];
     int searchKeys[SEARCH_SIZE];
 
-    /*
-     * 0 ~ 1000의 숫자가 이미 생성되었는지 확인하기 위한 배열
-     * 0이면 사용하지 않음
-     * 1이면 이미 사용함
-     */
     int used[MAX_VALUE + 1] = {0};
 
     TreeNode *root = NULL;
@@ -165,11 +225,24 @@ int main(void)
     long long sequentialTotal = 0;
     long long bstSearchTotal = 0;
 
+    long long sequentialSuccessTotal = 0;
+    long long sequentialFailTotal = 0;
+
+    long long bstSuccessTotal = 0;
+    long long bstFailTotal = 0;
+
     int successCount = 0;
     int failCount = 0;
 
+    int sequentialMin = DATA_SIZE + 1;
+    int sequentialMax = 0;
+
+    int bstMin = DATA_SIZE + 1;
+    int bstMax = 0;
+
     unsigned int seed = (unsigned int)time(NULL);
     srand(seed);
+
 
     printf("============================================================\n");
     printf(" Sequential Search vs Binary Search Tree Search\n");
@@ -193,13 +266,13 @@ int main(void)
         used[value] = 1;
 
         /*
-         * 생성된 순서 그대로 배열에 저장
-         * 배열을 정렬하지 않는다.
+         * 발생한 순서 그대로 배열에 저장한다.
+         * 배열은 정렬하지 않는다.
          */
         data[i] = value;
 
         /*
-         * 같은 순서로 BST에 삽입
+         * 동일한 값을 동일한 순서대로 BST에 삽입한다.
          */
         insertBST(&root, value, &bstBuildComparisons);
     }
@@ -216,13 +289,56 @@ int main(void)
 
 
     /* ========================================================
-       2. 탐색 대상 50개 생성
+       2. BST 구조 분석
+       ======================================================== */
+
+    int treeHeight = getHeight(root);
+    int leafCount = countLeafNodes(root);
+    int internalCount = countInternalNodes(root);
+
+    long long totalDepth = getTotalDepth(root, 1);
+
+    double averageDepth =
+        (double)totalDepth / DATA_SIZE;
+
+    double averageBuildComparisons =
+        (double)bstBuildComparisons / (DATA_SIZE - 1);
+
+
+    printf("\n============================================================\n");
+    printf("[BST Structure Statistics]\n");
+    printf("============================================================\n\n");
+
+    printf("Number of nodes                         : %d\n",
+           DATA_SIZE);
+
+    printf("BST Height                              : %d\n",
+           treeHeight);
+
+    printf("Leaf Nodes                              : %d\n",
+           leafCount);
+
+    printf("Internal Nodes                          : %d\n",
+           internalCount);
+
+    printf("Average Node Depth                      : %.2f\n",
+           averageDepth);
+
+    printf("Average Build Comparisons per Insertion : %.2f\n",
+           averageBuildComparisons);
+
+
+    /* ========================================================
+       3. 탐색 대상 50개 생성
        ======================================================== */
 
     for (int i = 0; i < SEARCH_SIZE; i++) {
         /*
-         * 탐색 대상은 중복되어도 상관없다.
-         * 데이터에 존재할 수도 있고 존재하지 않을 수도 있다.
+         * 탐색 대상은 데이터에 존재할 수도 있고
+         * 존재하지 않을 수도 있다.
+         *
+         * 탐색 대상끼리의 중복은 과제에서 제한하지 않았으므로
+         * 중복을 허용한다.
          */
         searchKeys[i] = rand() % (MAX_VALUE + 1);
     }
@@ -235,74 +351,108 @@ int main(void)
 
 
     /* ========================================================
-       3. 탐색 실행
+       4. 탐색 수행
        ======================================================== */
 
     printf("\n============================================================\n");
     printf("[Search Results]\n");
     printf("============================================================\n\n");
 
-    printf("%-5s %-12s %-10s %-18s %-18s\n",
+    printf("%-4s %-10s %-12s %-10s %-12s %-10s\n",
            "No.",
-           "Search Key",
-           "Result",
-           "Sequential Comp.",
+           "Key",
+           "Seq Result",
+           "Seq Comp.",
+           "BST Result",
            "BST Comp.");
 
-    printf("---------------------------------------------------------------------\n");
+    printf("--------------------------------------------------------------------\n");
 
 
     for (int i = 0; i < SEARCH_SIZE; i++) {
 
-        int seqComparison = 0;
+        int sequentialComparison = 0;
         int bstComparison = 0;
 
-        int seqFound;
+        int sequentialFound;
         int bstFound;
 
-        seqFound = sequentialSearch(
-            data,
-            DATA_SIZE,
-            searchKeys[i],
-            &seqComparison
-        );
 
-        bstFound = bstSearch(
-            root,
-            searchKeys[i],
-            &bstComparison
-        );
+        sequentialFound =
+            sequentialSearch(
+                data,
+                DATA_SIZE,
+                searchKeys[i],
+                &sequentialComparison
+            );
 
-        sequentialTotal += seqComparison;
+
+        bstFound =
+            bstSearch(
+                root,
+                searchKeys[i],
+                &bstComparison
+            );
+
+
+        sequentialTotal += sequentialComparison;
         bstSearchTotal += bstComparison;
 
-        if (seqFound)
+
+        /* 최소 비교 횟수 */
+        if (sequentialComparison < sequentialMin)
+            sequentialMin = sequentialComparison;
+
+        if (bstComparison < bstMin)
+            bstMin = bstComparison;
+
+
+        /* 최대 비교 횟수 */
+        if (sequentialComparison > sequentialMax)
+            sequentialMax = sequentialComparison;
+
+        if (bstComparison > bstMax)
+            bstMax = bstComparison;
+
+
+        /*
+         * 성공/실패별 통계
+         */
+        if (sequentialFound) {
             successCount++;
-        else
+
+            sequentialSuccessTotal += sequentialComparison;
+            bstSuccessTotal += bstComparison;
+        }
+        else {
             failCount++;
 
+            sequentialFailTotal += sequentialComparison;
+            bstFailTotal += bstComparison;
+        }
 
-        printf("%-5d %-12d %-10s %-18d %-18d\n",
+
+        printf("%-4d %-10d %-12s %-10d %-12s %-10d\n",
                i + 1,
                searchKeys[i],
-               seqFound ? "Found" : "Not Found",
-               seqComparison,
+               sequentialFound ? "Found" : "Not Found",
+               sequentialComparison,
+               bstFound ? "Found" : "Not Found",
                bstComparison);
 
 
         /*
          * 배열과 BST에는 동일한 데이터가 저장되어 있으므로
-         * 탐색 결과가 서로 다르면 오류
+         * 결과가 서로 다르면 프로그램 오류이다.
          */
-        if (seqFound != bstFound) {
-            printf("ERROR: Sequential Search and BST Search "
-                   "results are different.\n");
+        if (sequentialFound != bstFound) {
+            printf("ERROR: Search results are different.\n");
         }
     }
 
 
     /* ========================================================
-       4. 최종 통계
+       5. 기본 통계 계산
        ======================================================== */
 
     double sequentialAverage =
@@ -310,6 +460,32 @@ int main(void)
 
     double bstAverage =
         (double)bstSearchTotal / SEARCH_SIZE;
+
+
+    double sequentialSuccessAverage = 0.0;
+    double bstSuccessAverage = 0.0;
+
+    double sequentialFailAverage = 0.0;
+    double bstFailAverage = 0.0;
+
+
+    if (successCount > 0) {
+        sequentialSuccessAverage =
+            (double)sequentialSuccessTotal / successCount;
+
+        bstSuccessAverage =
+            (double)bstSuccessTotal / successCount;
+    }
+
+
+    if (failCount > 0) {
+        sequentialFailAverage =
+            (double)sequentialFailTotal / failCount;
+
+        bstFailAverage =
+            (double)bstFailTotal / failCount;
+    }
+
 
     long long bstTotalCost =
         bstBuildComparisons + bstSearchTotal;
@@ -319,80 +495,126 @@ int main(void)
     printf("[Search Statistics]\n");
     printf("============================================================\n\n");
 
-    printf("Number of searches                : %d\n",
+    printf("Number of searches                    : %d\n",
            SEARCH_SIZE);
 
-    printf("Successful searches               : %d\n",
+    printf("Successful searches                   : %d\n",
            successCount);
 
-    printf("Failed searches                   : %d\n",
+    printf("Failed searches                       : %d\n",
            failCount);
 
-    printf("\n");
+    printf("Search success rate                   : %.2f%%\n",
+           (double)successCount / SEARCH_SIZE * 100.0);
 
-    printf("Sequential Search Total comparisons : %lld\n",
+
+    printf("\n[Sequential Search]\n");
+
+    printf("Total comparisons                     : %lld\n",
            sequentialTotal);
 
-    printf("Sequential Search Average           : %.2f\n",
+    printf("Average comparisons                   : %.2f\n",
            sequentialAverage);
 
-    printf("\n");
+    printf("Minimum comparisons                   : %d\n",
+           sequentialMin);
 
-    printf("BST Search Total comparisons        : %lld\n",
+    printf("Maximum comparisons                   : %d\n",
+           sequentialMax);
+
+    printf("Average comparisons when Found        : %.2f\n",
+           sequentialSuccessAverage);
+
+    printf("Average comparisons when Not Found    : %.2f\n",
+           sequentialFailAverage);
+
+
+    printf("\n[BST Search]\n");
+
+    printf("Total comparisons                     : %lld\n",
            bstSearchTotal);
 
-    printf("BST Search Average                  : %.2f\n",
+    printf("Average comparisons                   : %.2f\n",
            bstAverage);
 
-    printf("\n");
+    printf("Minimum comparisons                   : %d\n",
+           bstMin);
 
-    printf("BST Build Total comparisons         : %lld\n",
+    printf("Maximum comparisons                   : %d\n",
+           bstMax);
+
+    printf("Average comparisons when Found        : %.2f\n",
+           bstSuccessAverage);
+
+    printf("Average comparisons when Not Found    : %.2f\n",
+           bstFailAverage);
+
+
+    printf("\n[BST Construction Cost]\n");
+
+    printf("BST Build Total Comparisons            : %lld\n",
            bstBuildComparisons);
 
-    printf("BST Build + Search comparisons      : %lld\n",
+    printf("BST Build Average per non-root insert  : %.2f\n",
+           averageBuildComparisons);
+
+    printf("BST Build + Search Comparisons         : %lld\n",
            bstTotalCost);
 
 
     /* ========================================================
-       추가 성능 분석
+       6. 추가 성능 분석
        ======================================================== */
 
     printf("\n============================================================\n");
     printf("[Performance Analysis]\n");
     printf("============================================================\n\n");
 
-    if (sequentialTotal > 0) {
 
-        double searchReduction =
-            (1.0 -
-             ((double)bstSearchTotal /
-              (double)sequentialTotal))
-            * 100.0;
-
-        printf("BST search comparison reduction : %.2f%%\n",
-               searchReduction);
-    }
+    double searchReduction =
+        (1.0 -
+         ((double)bstSearchTotal /
+          (double)sequentialTotal))
+        * 100.0;
 
 
-    /*
-     * 한 번의 탐색에서 BST가 평균적으로 절약하는 비교 횟수를
-     * 이용하여 BST 생성 비용을 회수하기 위해 필요한
-     * 대략적인 탐색 횟수를 계산한다.
-     */
+    double totalReduction =
+        (1.0 -
+         ((double)bstTotalCost /
+          (double)sequentialTotal))
+        * 100.0;
+
+
+    printf("BST Search Comparison Reduction       : %.2f%%\n",
+           searchReduction);
+
+    printf("Reduction Including BST Build Cost    : %.2f%%\n",
+           totalReduction);
+
+
     double savingPerSearch =
         sequentialAverage - bstAverage;
+
 
     if (savingPerSearch > 0) {
 
         double breakEven =
             (double)bstBuildComparisons / savingPerSearch;
 
-        printf("Estimated break-even searches    : %.2f\n",
+        int breakEvenRounded = (int)breakEven;
+
+        if ((double)breakEvenRounded < breakEven)
+            breakEvenRounded++;
+
+
+        printf("Estimated Break-even Searches         : %.2f\n",
                breakEven);
+
+        printf("Approx. Whole-number Break-even       : %d searches\n",
+               breakEvenRounded);
     }
     else {
-        printf("BST did not reduce average search comparisons "
-               "in this experiment.\n");
+        printf("BST did not reduce average comparisons.\n");
     }
 
 
@@ -400,17 +622,22 @@ int main(void)
 
     if (bstTotalCost < sequentialTotal) {
 
-        printf("Including BST construction cost, BST used fewer "
-               "comparisons in this experiment.\n");
+        printf(
+            "Including BST construction cost, "
+            "BST used fewer comparisons in this experiment.\n"
+        );
     }
     else {
 
-        printf("Including BST construction cost, Sequential Search "
-               "used fewer comparisons in this experiment.\n");
+        printf(
+            "Including BST construction cost, "
+            "Sequential Search used fewer comparisons "
+            "in this experiment.\n"
+        );
     }
 
 
-    /* 동적 메모리 해제 */
+    /* 메모리 해제 */
     freeBST(root);
 
     return 0;
