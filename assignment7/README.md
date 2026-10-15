@@ -58,12 +58,10 @@ gcc -std=c11 -Wall -Wextra main.c -o assignment07.exe
 
 다른 그래프로 시험할 때는 실행 명령 뒤에 **양의 정수 시드**를 붙인다. 예: `./assignment07 12345` 또는 `.\assignment07.exe 12345`.
 
-`sample_output.txt`는 **기본 시드로 직접 컴파일·실행한 전체 출력 결과**다.
 
 ## 4. 실제 실행 결과
 
-실험: 64비트 환경, 기본 시드 `20261015`. 프로그램 실행 결과는 `sample_output.txt`에 원문 그대로 보관했다.
-
+실험: 64비트 환경, 기본 시드 `20261015`. 
 | 측정 항목 | Case 1 희소·행렬 | Case 2 희소·리스트 | Case 3 밀집·행렬 | Case 4 밀집·리스트 |
 |---|---:|---:|---:|---:|
 | 메모리 사용량 (Bytes) | **40,008** | **4,008** | **40,008** | **128,808** |
@@ -162,7 +160,7 @@ Adjacent vertices of 37 (81)    : 0 1 4 5 6 7 8 9 10 11 12 13 14 15 17 18 19 20 
 All four cases completed successfully.
 ```
 
-실행 결과에서 두 그래프 모두 `Representation verification: PASS`가 표시되었고, 네 가지 경우가 모두 정상 완료되었다. 위 출력은 `sample_output.txt`에서도 동일하게 확인할 수 있다.
+실행 결과에서 두 그래프 모두 `Representation verification: PASS`가 표시되었고, 네 가지 경우가 모두 정상 완료되었다.
 
 ## 5. 결과 분석
 
