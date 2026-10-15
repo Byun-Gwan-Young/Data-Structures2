@@ -63,11 +63,12 @@ gcc -std=c11 -Wall -Wextra -Wpedantic main.c -o main.exe
 - 인자를 주지 않으면 `time(NULL)`을 사용하여 **실행할 때마다 대체로 다른 그래프**가 생성됩니다.
 - 시드를 직접 지정하면 **동일한 실행 환경 및 C 런타임에서 같은 결과**를 다시 얻을 수 있습니다.
 - C 표준의 `rand()` 난수 수열은 운영체제/컴파일러의 C 런타임에 따라 다를 수 있어 **동일 시드라도 macOS와 Windows의 출력은 다를 수 있습니다**.
-- 아래 결과는 한 실행 환경에서 시드 `20261015`를 사용한 실제 실행 기록입니다.
+- 아래 결과는 **macOS(MacBook Pro)** 에서 `./main 20261015`로 실행한 결과입니다(2026-10-15, 사용자 실행 로그 기준).
+- 최초 작성본에는 Linux 환경의 같은 시드 출력이 들어 있었지만, 운영체제 간 `rand()` 동작 차이로 macOS 결과와 달라 **실제 제출 환경인 macOS 결과로 교체했습니다**. `main.c`는 수정하지 않았습니다.
 
 ## 6. 실제 실행 결과 (시드: 20261015)
 
-아래에는 **간선 20개와 최단경로 45개 전체**를 생략 없이 수록했습니다.
+아래에는 **MacBook에서 직접 실행한 간선 20개와 최단경로 45개 전체**를 생략 없이 수록했습니다. 결과는 별도로 구현한 Dijkstra 알고리즘으로 최단거리 45개를 재확인했습니다.
 
 ```text
 Random Seed    : 20261015
@@ -80,208 +81,208 @@ Connected      : Yes
 
 [Generated Edges]
 Edge       Weight
-(0, 2)       2
-(0, 3)      33
-(0, 4)      34
-(0, 6)      52
-(0, 9)      41
-(1, 2)      60
-(1, 4)      62
-(1, 5)      11
-(1, 6)      92
-(1, 7)      63
-(1, 8)      14
-(2, 5)      81
-(2, 7)       4
-(2, 9)      72
-(3, 4)      59
-(3, 5)     100
-(3, 6)      42
-(3, 9)      49
-(4, 7)      18
-(7, 9)      47
+(0, 2)      58
+(0, 5)      71
+(0, 6)      66
+(0, 9)       2
+(1, 4)      28
+(1, 5)      28
+(1, 9)      92
+(2, 7)       5
+(2, 8)       1
+(2, 9)      16
+(3, 4)      64
+(3, 5)      84
+(3, 7)      75
+(4, 7)      34
+(4, 9)       7
+(5, 6)      57
+(5, 7)      73
+(6, 7)      74
+(7, 8)      63
+(8, 9)      93
 
 [Shortest Paths]
 
 0 -> 1
-Path     : 0 -> 2 -> 1
-Distance : 62
+Path     : 0 -> 9 -> 4 -> 1
+Distance : 37
 
 0 -> 2
-Path     : 0 -> 2
-Distance : 2
+Path     : 0 -> 9 -> 2
+Distance : 18
 
 0 -> 3
-Path     : 0 -> 3
-Distance : 33
+Path     : 0 -> 9 -> 4 -> 3
+Distance : 73
 
 0 -> 4
-Path     : 0 -> 2 -> 7 -> 4
-Distance : 24
+Path     : 0 -> 9 -> 4
+Distance : 9
 
 0 -> 5
-Path     : 0 -> 2 -> 1 -> 5
-Distance : 73
+Path     : 0 -> 9 -> 4 -> 1 -> 5
+Distance : 65
 
 0 -> 6
 Path     : 0 -> 6
-Distance : 52
+Distance : 66
 
 0 -> 7
-Path     : 0 -> 2 -> 7
-Distance : 6
+Path     : 0 -> 9 -> 2 -> 7
+Distance : 23
 
 0 -> 8
-Path     : 0 -> 2 -> 1 -> 8
-Distance : 76
+Path     : 0 -> 9 -> 2 -> 8
+Distance : 19
 
 0 -> 9
 Path     : 0 -> 9
-Distance : 41
+Distance : 2
 
 1 -> 2
-Path     : 1 -> 2
-Distance : 60
+Path     : 1 -> 4 -> 9 -> 2
+Distance : 51
 
 1 -> 3
-Path     : 1 -> 2 -> 0 -> 3
-Distance : 95
+Path     : 1 -> 4 -> 3
+Distance : 92
 
 1 -> 4
 Path     : 1 -> 4
-Distance : 62
+Distance : 28
 
 1 -> 5
 Path     : 1 -> 5
-Distance : 11
+Distance : 28
 
 1 -> 6
-Path     : 1 -> 6
-Distance : 92
+Path     : 1 -> 5 -> 6
+Distance : 85
 
 1 -> 7
-Path     : 1 -> 7
-Distance : 63
+Path     : 1 -> 4 -> 9 -> 2 -> 7
+Distance : 56
 
 1 -> 8
-Path     : 1 -> 8
-Distance : 14
+Path     : 1 -> 4 -> 9 -> 2 -> 8
+Distance : 52
 
 1 -> 9
-Path     : 1 -> 2 -> 0 -> 9
-Distance : 103
-
-2 -> 3
-Path     : 2 -> 0 -> 3
+Path     : 1 -> 4 -> 9
 Distance : 35
 
+2 -> 3
+Path     : 2 -> 7 -> 3
+Distance : 80
+
 2 -> 4
-Path     : 2 -> 7 -> 4
-Distance : 22
+Path     : 2 -> 9 -> 4
+Distance : 23
 
 2 -> 5
-Path     : 2 -> 1 -> 5
-Distance : 71
+Path     : 2 -> 7 -> 5
+Distance : 78
 
 2 -> 6
-Path     : 2 -> 0 -> 6
-Distance : 54
+Path     : 2 -> 7 -> 6
+Distance : 79
 
 2 -> 7
 Path     : 2 -> 7
-Distance : 4
+Distance : 5
 
 2 -> 8
-Path     : 2 -> 1 -> 8
-Distance : 74
+Path     : 2 -> 8
+Distance : 1
 
 2 -> 9
-Path     : 2 -> 0 -> 9
-Distance : 43
+Path     : 2 -> 9
+Distance : 16
 
 3 -> 4
-Path     : 3 -> 0 -> 2 -> 7 -> 4
-Distance : 57
+Path     : 3 -> 4
+Distance : 64
 
 3 -> 5
 Path     : 3 -> 5
-Distance : 100
+Distance : 84
 
 3 -> 6
-Path     : 3 -> 6
-Distance : 42
+Path     : 3 -> 4 -> 9 -> 0 -> 6
+Distance : 139
 
 3 -> 7
-Path     : 3 -> 0 -> 2 -> 7
-Distance : 39
+Path     : 3 -> 7
+Distance : 75
 
 3 -> 8
-Path     : 3 -> 0 -> 2 -> 1 -> 8
-Distance : 109
+Path     : 3 -> 7 -> 2 -> 8
+Distance : 81
 
 3 -> 9
-Path     : 3 -> 9
-Distance : 49
+Path     : 3 -> 4 -> 9
+Distance : 71
 
 4 -> 5
 Path     : 4 -> 1 -> 5
-Distance : 73
+Distance : 56
 
 4 -> 6
-Path     : 4 -> 7 -> 2 -> 0 -> 6
-Distance : 76
+Path     : 4 -> 9 -> 0 -> 6
+Distance : 75
 
 4 -> 7
-Path     : 4 -> 7
-Distance : 18
+Path     : 4 -> 9 -> 2 -> 7
+Distance : 28
 
 4 -> 8
-Path     : 4 -> 1 -> 8
-Distance : 76
+Path     : 4 -> 9 -> 2 -> 8
+Distance : 24
 
 4 -> 9
-Path     : 4 -> 7 -> 9
-Distance : 65
+Path     : 4 -> 9
+Distance : 7
 
 5 -> 6
-Path     : 5 -> 1 -> 6
-Distance : 103
+Path     : 5 -> 6
+Distance : 57
 
 5 -> 7
-Path     : 5 -> 1 -> 7
-Distance : 74
+Path     : 5 -> 7
+Distance : 73
 
 5 -> 8
-Path     : 5 -> 1 -> 8
-Distance : 25
+Path     : 5 -> 7 -> 2 -> 8
+Distance : 79
 
 5 -> 9
-Path     : 5 -> 1 -> 2 -> 0 -> 9
-Distance : 114
+Path     : 5 -> 1 -> 4 -> 9
+Distance : 63
 
 6 -> 7
-Path     : 6 -> 0 -> 2 -> 7
-Distance : 58
+Path     : 6 -> 7
+Distance : 74
 
 6 -> 8
-Path     : 6 -> 1 -> 8
-Distance : 106
+Path     : 6 -> 7 -> 2 -> 8
+Distance : 80
 
 6 -> 9
-Path     : 6 -> 3 -> 9
-Distance : 91
+Path     : 6 -> 0 -> 9
+Distance : 68
 
 7 -> 8
-Path     : 7 -> 1 -> 8
-Distance : 77
+Path     : 7 -> 2 -> 8
+Distance : 6
 
 7 -> 9
-Path     : 7 -> 9
-Distance : 47
+Path     : 7 -> 2 -> 9
+Distance : 21
 
 8 -> 9
-Path     : 8 -> 1 -> 2 -> 0 -> 9
-Distance : 117
+Path     : 8 -> 2 -> 9
+Distance : 17
 
 Total vertex pairs : 45
 Path verification  : PASS (all path weights match)
